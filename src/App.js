@@ -9,7 +9,7 @@ import SkeletonPokemon from "./Components/Pokemon/SkeletonPokemon";
 function App() {
   const [pokemonList, setPokemonList] = useState([]);
   const [modalIsShow, setModalIsShow] = useState(false);
-  const [offset, setOffset] = useState(9);
+  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -47,8 +47,9 @@ function App() {
         <h3 className="font-bold text-5xl text uppercase text-center my-4">
           Pokedex
         </h3>
+
         {isLoading && (
-          <>
+          <div className="flex flex-wrap px-10 sm:px-14 md:px-15 lg:px-52 py-4 justify-between">
             <SkeletonPokemon />
             <SkeletonPokemon />
             <SkeletonPokemon />
@@ -58,7 +59,7 @@ function App() {
             <SkeletonPokemon />
             <SkeletonPokemon />
             <SkeletonPokemon />
-          </>
+          </div>
         )}
         {!isLoading && (
           <PokemonList
