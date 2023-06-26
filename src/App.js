@@ -5,28 +5,23 @@ import PokemonList from "./Components/Pokemon/PokemonList";
 import PokemonModal from "./Components/UI/PokemonModal";
 import Pagination from "./Components/UI/Pagination";
 import SkeletonPokemon from "./Components/Pokemon/SkeletonPokemon";
+import PokemonForm from "./Components/Pokemon/PokemonForm";
+import { fetchPokemon } from "./store/PokemonStore";
+import { useDispatch, useSelector } from "react-redux";
 
 function App() {
-  const [pokemonList, setPokemonList] = useState([]);
   const [modalIsShow, setModalIsShow] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [pokemonName, setPokemonName] = useState("");
+  const dispatch = useDispatch();
+  const pokemonList = useSelector((state) => state.pokemon.listPokemon);
+  const isLoading = useSelector((state) => state.ui.isLoading);
 
   useEffect(() => {
-    setIsLoading((prevState) => !prevState);
-
-    const fetchPokemon = async () => {
-      const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon?limit=9}&offset=${offset}`
-      );
-
-      const data = await response.json();
-      setPokemonList(data.results);
-      setIsLoading((prevState) => !prevState);
-    };
+    dispatch(fetchPokemon(pokemonName, offset));
 
     fetchPokemon();
-  }, [setPokemonList, offset]);
+  }, [offset, pokemonName]);
 
   const toggleModalHandler = () => {
     setModalIsShow((prevToggle) => !prevToggle);
@@ -40,6 +35,11 @@ function App() {
     }
   };
 
+  const changePokemonNameHandler = (pokemonName) => {
+    setPokemonName(pokemonName);
+  };
+
+  console.log(pokemonList);
   return (
     <>
       <PokemonModal showModal={modalIsShow} toggleModal={toggleModalHandler} />
@@ -47,7 +47,7 @@ function App() {
         <h3 className="font-bold text-5xl text uppercase text-center my-4">
           Pokedex
         </h3>
-
+        <PokemonForm changeHandler={changePokemonNameHandler} />
         {isLoading && (
           <div className="flex flex-wrap px-10 sm:px-14 md:px-15 lg:px-52 py-4 justify-between">
             <SkeletonPokemon />
@@ -61,13 +61,29 @@ function App() {
             <SkeletonPokemon />
           </div>
         )}
-        {!isLoading && (
-          <PokemonList
-            pokemonList={pokemonList}
-            toggleModal={toggleModalHandler}
-          />
+        {!isLoading && Array.isArray(pokemonList) && (
+          <>
+            <PokemonList
+              pokemonList={pokemonList}
+              toggleModal={toggleModalHandler}
+            />
+            <Pagination offset={offset} changePage={changePageHandler} />
+          </>
         )}
-        <Pagination offset={offset} changePage={changePageHandler} />
+        {!isLoading &&
+          !Array.isArray(pokemonList) &&
+          typeof pokemonList === "object" && (
+            <PokemonList
+              pokemonList={pokemonList}
+              toggleModal={toggleModalHandler}
+            />
+          )}
+
+        {!isLoading && !pokemonList && (
+          <h1 className="font-bold text-3xl text-center mt-12">
+            Pokemon Not Found!
+          </h1>
+        )}
       </div>
     </>
   );

@@ -1,17 +1,31 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { pokemonActions, fetchPokemon } from "../../store/PokemonStore";
+import { getPokemonById, pokemonActions } from "../../store/PokemonStore";
 
-function PokemonItem({ name, url, toggleModalHandler }) {
-  let pattern = /\/\d+/g;
-  let pokemonId = pattern.exec(url)[0];
-  pokemonId = pokemonId.replace("/", "");
+function PokemonItem({
+  name,
+  url = false,
+  toggleModalHandler,
+  pokemonDetail = false,
+}) {
+  const dispatch = useDispatch();
+  let pokemonId = "";
+  if (!pokemonDetail) {
+    let pattern = /\/\d+/g;
+    pokemonId = pattern.exec(url)[0];
+    pokemonId = pokemonId.replace("/", "");
+  } else {
+    pokemonId = pokemonDetail.id;
+  }
+
   const srcImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
 
-  const dispatch = useDispatch();
-
   const clickHandler = () => {
-    dispatch(fetchPokemon(pokemonId));
+    if (!pokemonDetail) {
+      dispatch(getPokemonById(pokemonId));
+    } else {
+      dispatch(pokemonActions.updatePokemon(pokemonDetail));
+    }
     toggleModalHandler();
   };
 
